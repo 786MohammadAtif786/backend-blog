@@ -225,8 +225,19 @@ export const logoutUser = async (req, res) => {
         }
 
         // cookies clear
-        res.clearCookie("accessToken");
-        res.clearCookie("refreshToken");
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None"
+        });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None"
+        });
+        // res.clearCookie("accessToken");
+        // res.clearCookie("refreshToken");
 
         res.json({
             message: "Logged out successfully"

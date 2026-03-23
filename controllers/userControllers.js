@@ -16,11 +16,9 @@ dotenv.config()
 export const registerUser = async (req, res) => {
 
     try {
-        console.log("first data ==>", req.body);
         
         const data = registerSchema.parse(req.body)
 
-        console.log("data parse ===>", data);
         
 
         const { name, email, password } = data

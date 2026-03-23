@@ -14,6 +14,9 @@ export const sendEmail = async (email, token) => {
       }
     });
 
+    console.log("Sending email to:", email);
+
+
     const verifyUrl = `${process.env.FRONTEND_URL}/verify/${token}`;
 
     await transporter.sendMail({

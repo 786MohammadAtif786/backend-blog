@@ -1,3 +1,4 @@
+import dotenv from "dotenv"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
@@ -10,11 +11,17 @@ import {
 } from "../utils/generateToken.js";
 
 
+dotenv.config()
+
 export const registerUser = async (req, res) => {
 
     try {
-
+        console.log("first data ==>", req.body);
+        
         const data = registerSchema.parse(req.body)
+
+        console.log("data parse ===>", data);
+        
 
         const { name, email, password } = data
 
@@ -23,7 +30,7 @@ export const registerUser = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({ message: "Email already exists" })
         }
-
+        
         const hashedPassword = await bcrypt.hash(password, 10)
 
         const user = await User.create({
@@ -52,9 +59,9 @@ export const registerUser = async (req, res) => {
                 errors: err.errors.map(e => e.message)
             });
         }
-
+        console.log(err)
         return res.status(400).json({
-            message: "Something went wrong"
+            message: err || "Something went wrong"
         });
 
     }

@@ -40,7 +40,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  //origin: "http://localhost:5173",
+  origin: "http://frontend-blog-alpha-ten.vercel.app",
   credentials: true
 }));
 

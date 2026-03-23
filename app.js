@@ -35,25 +35,27 @@ redisCilent.connect().then(() => {
     console.log(err);
     
 })
-// middleware
-app.use(cookieParser());
-app.use(express.json());
-
-// app.use(cors({
-//   //origin: "http://localhost:5173",
-//   origin: "https://frontend-blog-alpha-ten.vercel.app",
-//   credentials: true
-// }));
 
 app.use(cors({
   origin: [
-    "http://localhost:5173",
-    "https://frontend-blog-alpha-ten.vercel.app"
+     "http://localhost:5173",
+    "https://frontend-blog-alpha-ten.vercel.app",
+    "https://devnotes.sbs",
+    "https://www.devnotes.sbs"
   ],
   credentials: true
 }));
 
-app.use(helmet());
+app.options("*", cors());
+
+// middleware
+app.use(cookieParser());
+app.use(express.json());
+
+
+app.use(helmet({
+  crossOriginResourcePolicy: false
+}));
 
 
 // routes

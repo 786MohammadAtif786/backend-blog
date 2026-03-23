@@ -39,9 +39,17 @@ redisCilent.connect().then(() => {
 app.use(cookieParser());
 app.use(express.json());
 
+// app.use(cors({
+//   //origin: "http://localhost:5173",
+//   origin: "https://frontend-blog-alpha-ten.vercel.app",
+//   credentials: true
+// }));
+
 app.use(cors({
-  //origin: "http://localhost:5173",
-  origin: "http://frontend-blog-alpha-ten.vercel.app",
+  origin: [
+    "http://localhost:5173",
+    "https://frontend-blog-alpha-ten.vercel.app"
+  ],
   credentials: true
 }));
 

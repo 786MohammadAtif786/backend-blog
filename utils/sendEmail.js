@@ -45,7 +45,7 @@ export const sendEmail = async (email, token) => {
 
     const msg = {
       to: email,
-      from: process.env.SMTP_USER, // ⚠️ verified email
+      from: process.env.EMAIL_FROM, // ⚠️ verified email
       subject: "Verify Your Email",
       html: `
         <h2>Welcome 🎉</h2>
@@ -73,13 +73,13 @@ export const sendTOPublishBlog = async ({ to, subject, html }) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   });
 
   await transporter.sendMail({
-    from: `"DevNotes" <${process.env.SMTP_USER}>`,
+    from: `"DevNotes" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html,

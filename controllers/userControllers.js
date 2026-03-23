@@ -45,7 +45,7 @@ export const registerUser = async (req, res) => {
             { expiresIn: "1d" }
         )
 
-        await sendEmail(email, token)
+        sendEmail(email, token)
 
         res.json({
             message: "Verification email sent"

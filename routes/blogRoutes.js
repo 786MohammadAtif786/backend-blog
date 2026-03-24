@@ -38,8 +38,8 @@ router.get("/my", protect, getMyBlogs);
 router.put("/:id", protect, updateBlog);
 router.get("/:id", getSingleBlog);
 router.get("/category/:category", getBlogsByCategory);
-router.get("/:id", getSingleBlogViews);
 router.get("/search", searchBlogs)
+router.get("/:id", getSingleBlogViews);
 // router.delete("/:id", protect, deleteBlog);
 // router.put("/approve/:id", protect, isAdmin, approveBlog);
 

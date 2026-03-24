@@ -459,10 +459,52 @@ export const getSingleBlogViews = async (req, res) => {
 
   const blog = await Blog.findByIdAndUpdate(
     req.params.id,
-    { $inc: { views: 1 } }, // 🔥 increment
+    { $inc: { views: 1 } }, 
     { new: true }
   ).populate("author", "name");
 
   res.json({ blog });
 
+};
+
+
+
+// export const searchBlogs = async (req, res) => {
+//   try {
+//     const q = req.query.q;
+
+//     const blogs = await Blog.find({
+//       title: { $regex: q, $options: "i" } 
+//     }).populate("author", "name");
+
+//     res.json(blogs);
+
+//   } catch (err) {
+//     res.status(500).json({ message: "Search error" });
+//   }
+// };
+
+
+export const searchBlogs = async (req, res) => {
+  try {
+    const q = req.query.q;
+
+    if (!q) {
+      return res.json({ blogs: [] });
+    }
+
+    const blogs = await Blog.find({
+      $or: [
+        { title: { $regex: q, $options: "i" } },
+        { content: { $regex: q, $options: "i" } },
+        { categories: { $regex: q, $options: "i" } }
+      ]
+    }).populate("author", "name");
+
+    res.json({ blogs });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Search error" });
+  }
 };

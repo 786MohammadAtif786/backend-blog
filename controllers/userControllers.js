@@ -394,6 +394,8 @@ export const forgotPassword = async (req, res) => {
         res.json({ message: "Reset link sent successfully" });
 
     } catch (error) {
+        console.log(error);
+        
         console.log("❌ SendGrid Error:", error.response?.body);
         res.status(500).json({ message: "Error sending email" });
     }

@@ -46,6 +46,26 @@ app.use(cors({
   credentials: true
 }));
 
+
+
+app.use(cors({
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "https://frontend-blog-alpha-ten.vercel.app",
+      "https://devnotes.sbs",
+      "https://www.devnotes.sbs"
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
+
+
 // app.use(cors({
 //   origin: function (origin, callback) {
 //     // allow requests with no origin (mobile apps, postman)

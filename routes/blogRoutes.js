@@ -6,6 +6,7 @@ import {
     createBlog,
     deleteBlog,
     publishBlog,
+    searchBlogs,
     getPublishedBlogs,
     getRelatedBlogs,
     toggleLikeBlog,
@@ -17,7 +18,6 @@ import {
     updateBlog,
     getBlogsByCategory,
     getSingleBlogViews,
-    searchBlogs
 } from "../controllers/blogController.js";
 
 const router = express.Router();

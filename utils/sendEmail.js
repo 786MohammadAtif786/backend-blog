@@ -42,7 +42,8 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 export const sendEmail = async (email, token) => {
   try {
     //const verifyUrl = `${process.env.FRONTEND_URL}/verify/${token}`;
-    const url = "https://frontend-blog-alpha-ten.vercel.app"
+    //const url = "https://frontend-blog-alpha-ten.vercel.app"
+    const url = "https://www.devnotes.sbs"
     const verifyUrl = `${url}/verify/${token}`
     const msg = {
       to: email,

@@ -8,7 +8,9 @@ import {
  logoutUser,
  getMe,
  getAllUsers,
- toggleBlockUser
+ toggleBlockUser,
+ forgotPassword,
+ resetPassword
 } from "../controllers/userControllers.js"
 import { protect } from "../middleware/authMiddleware.js"
 
@@ -24,7 +26,9 @@ router.post("/logout", logoutUser);
 router.get("/me", protect, getMe)
 router.get("/verify/:token",verifyEmail);
 router.get("/admin/users", protect, getAllUsers);
-router.patch("/admin/block/:id", protect, toggleBlockUser)
+router.patch("/admin/block/:id", protect, toggleBlockUser);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 
 export default router

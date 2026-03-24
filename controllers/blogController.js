@@ -500,7 +500,7 @@ export const searchBlogs = async (req, res) => {
         { categories: { $regex: q, $options: "i" } }
       ]
     }).populate("author", "name");
-
+    console.log(blogs)
     res.json({ blogs });
 
   } catch (err) {

@@ -378,7 +378,7 @@ export const forgotPassword = async (req, res) => {
         const msg = {
             to: user.email,
             from: {
-                email: process.env.SENDGRID_EMAIL,
+                email: process.env.EMAIL_FROM,
                 name: "Auth App"
             },
             subject: "Password Reset",

@@ -304,6 +304,58 @@ export const toggleBlockUser = async (req, res) => {
 
 // import User from "../models/User.js";
 
+// export const forgotPassword = async (req, res) => {
+//     try {
+//         const { email } = req.body;
+
+//         const user = await User.findOne({ email });
+
+//         if (!user) {
+//             return res.status(404).json({
+//                 message: "User not found"
+//             });
+//         }
+
+//         // 🔐 Generate token
+//         const token = crypto.randomBytes(32).toString("hex");
+
+//         // Save token + expiry
+//         user.resetPasswordToken = token;
+//         user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 min
+
+//         await user.save();
+
+//         // 🔗 Reset link
+//         const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
+
+//         // 📧 Send Email (SendGrid)
+//         const msg = {
+//             to: user.email,
+//             from: process.env.SENDGRID_EMAIL, // verified sender
+//             subject: "Password Reset Request",
+//             html: `
+//                 <h2>Password Reset</h2>
+//                 <p>You requested to reset your password.</p>
+//                 <a href="${resetLink}" style="color:blue;">Click here to reset</a>
+//                 <p>This link expires in 15 minutes.</p>
+//             `
+//         };
+
+//         await sgMail.send(msg);
+
+//         res.json({
+//             message: "Reset link sent to your email"
+//         });
+
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({
+//             message: "Server error"
+//         });
+//     }
+// };
+
+
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -311,51 +363,41 @@ export const forgotPassword = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            });
+            return res.status(404).json({ message: "User not found" });
         }
 
-        // 🔐 Generate token
         const token = crypto.randomBytes(32).toString("hex");
 
-        // Save token + expiry
         user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 min
+        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
 
         await user.save();
 
-        // 🔗 Reset link
         const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
-        // 📧 Send Email (SendGrid)
         const msg = {
             to: user.email,
-            from: process.env.SENDGRID_EMAIL, // verified sender
-            subject: "Password Reset Request",
+            from: {
+                email: process.env.SENDGRID_EMAIL,
+                name: "Auth App"
+            },
+            subject: "Password Reset",
             html: `
                 <h2>Password Reset</h2>
-                <p>You requested to reset your password.</p>
-                <a href="${resetLink}" style="color:blue;">Click here to reset</a>
-                <p>This link expires in 15 minutes.</p>
+                <p>Click below:</p>
+                <a href="${resetLink}">${resetLink}</a>
             `
         };
 
         await sgMail.send(msg);
 
-        res.json({
-            message: "Reset link sent to your email"
-        });
+        res.json({ message: "Reset link sent successfully" });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Server error"
-        });
+        console.log("❌ SendGrid Error:", error.response?.body);
+        res.status(500).json({ message: "Error sending email" });
     }
 };
-
-
 
 
 export const resetPassword = async (req, res) => {

@@ -104,6 +104,9 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+    if (!user) {
+            return res.status(400).json({ message: "Invalid email" });
+        }
 
     if (user.isBlocked) {
         return res.status(403).json({
@@ -111,9 +114,7 @@ export const loginUser = async (req, res) => {
         });
     }
 
-    if (!user) {
-        return res.status(400).json({ message: "Invalid email" });
-    }
+   
 
     const match = await bcrypt.compare(password, user.password);
 

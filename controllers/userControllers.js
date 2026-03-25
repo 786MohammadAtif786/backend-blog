@@ -149,6 +149,7 @@ export const loginUser = async (req, res) => {
         maxAge: 15 * 60 * 1000,
         sameSite: "None",
          path: "/",
+         domain: ".devnotes.sbs"
 
     });
 
@@ -156,7 +157,9 @@ export const loginUser = async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "None",
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/",
+         domain: ".devnotes.sbs"
     });
 
     res.json({

@@ -142,28 +142,29 @@ export const loginUser = async (req, res) => {
         7 * 24 * 60 * 60
     );
 
+    const isProd = process.env.NODE_ENV === "production";
+
+
     // cookie
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        secure: true,
+        secure: isProd,
         maxAge: 15 * 60 * 1000,
-        sameSite: "None",
-         path: "/",
-         domain: ".devnotes.sbs"
+        sameSite: isProd ? "None": "Lax",
+        path: "/",
 
     });
 
     res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "None",
+        secure: isProd,
+        sameSite: isProd ? "None": "Lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: "/",
-         domain: ".devnotes.sbs"
     });
 
-    console.log("acccessToken====>", accessToken)
-    console.log("refreshToken====>", refreshToken);
+    // console.log("acccessToken====>", accessToken)
+    // console.log("refreshToken====>", refreshToken);
     
 
     res.json({

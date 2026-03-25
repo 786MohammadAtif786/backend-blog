@@ -271,17 +271,58 @@ export const refreshToken = async (req, res) => {
 // };
 
 
+// export const logoutUser = async (req, res) => {
+//     try {
+//         const token = req.cookies.refreshToken;
+
+//         if (token) {
+//             const decoded = jwt.verify(
+//                 token,
+//                 process.env.REFRESH_SECRET
+//             );
+
+//             await redisCilent.del(`refresh:${decoded._id}`);
+//         }
+
+//         res.clearCookie("accessToken", {
+//             httpOnly: true,
+//             secure: true,
+//             sameSite: "None",
+//             path: "/",
+//             // domain: ".devnotes.sbs"
+//         });
+
+//         res.clearCookie("refreshToken", {
+//             httpOnly: true,
+//             secure: true,
+//             sameSite: "None",
+//             path: "/",
+//             // domain: ".devnotes.sbs"
+//         });
+
+//         res.json({
+//             message: "Logged out successfully"
+//         });
+
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({
+//             message: "Logout error"
+//         });
+//     }
+// };
+
+
+
 export const logoutUser = async (req, res) => {
     try {
+
         const token = req.cookies.refreshToken;
 
         if (token) {
-            const decoded = jwt.verify(
-                token,
-                process.env.REFRESH_SECRET
-            );
+            const decoded = jwt.verify(token, process.env.REFRESH_SECRET);
 
-            await redisCilent.del(`refresh:${decoded._id}`);
+            await redisCilent.del(`refresh:${decoded.id}`);
         }
 
         res.clearCookie("accessToken", {
@@ -289,7 +330,6 @@ export const logoutUser = async (req, res) => {
             secure: true,
             sameSite: "None",
             path: "/",
-            domain: ".devnotes.sbs"
         });
 
         res.clearCookie("refreshToken", {
@@ -297,21 +337,14 @@ export const logoutUser = async (req, res) => {
             secure: true,
             sameSite: "None",
             path: "/",
-            domain: ".devnotes.sbs"
         });
 
-        res.json({
-            message: "Logged out successfully"
-        });
+        res.json({ message: "Logged out" });
 
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: "Logout error"
-        });
+    } catch (err) {
+        res.status(500).json({ message: "Error" });
     }
 };
-
 
 export const getMe = async (req, res) => {
 

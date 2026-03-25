@@ -162,6 +162,10 @@ export const loginUser = async (req, res) => {
          domain: ".devnotes.sbs"
     });
 
+    console.log("acccessToken====>", accessToken)
+    console.log("refreshToken====>", refreshToken);
+    
+
     res.json({
         message: "Login success",
         user

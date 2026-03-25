@@ -35,16 +35,17 @@ redisCilent.connect().then(() => {
     console.log(err);
     
 })
+app.set("trust proxy", 1);
 
-app.use(cors({
-  origin: [
-     "http://localhost:5173",
-    "https://frontend-blog-alpha-ten.vercel.app",
-    "https://devnotes.sbs",
-    "https://www.devnotes.sbs"
-  ],
-  credentials: true
-}));
+// app.use(cors({
+//   origin: [
+//      "http://localhost:5173",
+//     "https://frontend-blog-alpha-ten.vercel.app",
+//     "https://devnotes.sbs",
+//     "https://www.devnotes.sbs"
+//   ],
+//   credentials: true
+// }));
 
 
 
@@ -86,7 +87,8 @@ app.use(express.json());
 
 
 app.use(helmet({
-  crossOriginResourcePolicy: false
+  crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy: false
 }));
 
 

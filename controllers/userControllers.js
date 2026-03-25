@@ -175,6 +175,53 @@ export const loginUser = async (req, res) => {
 };
 
 
+// export const refreshToken = async (req, res) => {
+
+//     const token = req.cookies.refreshToken;
+
+//     if (!token) {
+//         return res.status(401).json({ message: "No refresh token" });
+//     }
+
+//     try {
+
+//         const decoded = jwt.verify(
+//             token,
+//             process.env.REFRESH_SECRET
+//         );
+
+//         const storedToken = await redisCilent.get(`refresh:${decoded.id}`);
+
+//         if (storedToken !== token) {
+//             return res.status(403).json({
+//                 message: "Invalid refresh token"
+//             });
+//         }
+
+//         const newAccessToken = generateAccessToken({
+//             _id: decoded.id
+//         });
+
+//         res.cookie("accessToken", newAccessToken, {
+//             httpOnly: true,
+//             maxAge: 15 * 60 * 1000
+//         });
+
+//         res.json({
+//             message: "New access token generated"
+//         });
+
+//     } catch (err) {
+//         console.log(err);
+
+//         res.status(403).json({
+//             message: "Refresh token expired"
+//         });
+
+//     }
+
+// };
+
 export const refreshToken = async (req, res) => {
 
     const token = req.cookies.refreshToken;
@@ -202,8 +249,13 @@ export const refreshToken = async (req, res) => {
             _id: decoded.id
         });
 
+        const isProd = process.env.NODE_ENV === "production";
+
         res.cookie("accessToken", newAccessToken, {
             httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "None" : "Lax",
+            path: "/",
             maxAge: 15 * 60 * 1000
         });
 
@@ -217,11 +269,8 @@ export const refreshToken = async (req, res) => {
         res.status(403).json({
             message: "Refresh token expired"
         });
-
     }
-
 };
-
 
 
 // export const logoutUser = async (req, res) => {

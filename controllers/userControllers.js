@@ -190,15 +190,119 @@ export const verifyEmail = async (req, res) => {
 
 
 
-export const loginUser = async (req, res) => {
+// export const loginUser = async (req, res) => {
 
+//     const { email, password } = req.body;
+
+//     const key = `login_attempts:${email}`;
+
+//     let attempts = await redisCilent.get(key);
+
+//     // 🔴 check lock
+//     if (attempts && parseInt(attempts) >= 3) {
+//       const ttl = await redisCilent.ttl(key);
+
+//       return res.status(429).json({
+//         message: "Too many attempts",
+//         ttl,
+//       });
+//     }
+
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//             return res.status(400).json({ message: "User is not found" });
+//         }
+
+//  if (!user) {
+//     attempts = await redisCilent.incr(key);
+//     if (attempts === 1) await redisCilent.expire(key, 900);
+//     return res.status(400).json({ msg: "Invalid credentials" });
+//   }
+
+//    const match = await bcrypt.compare(password, user.password);
+
+//     if (!match) {
+//       attempts = await redisCilent.incr(key);
+//       if (attempts === 1) await redisCilent.expire(key, 120);
+
+//       return res.status(400).json({
+//         message: "Invalid credentials",
+//       });
+//     }
+
+//     // ✅ success → reset attempts
+//     await redisCilent.del(key);
+
+//     if (user.isBlocked) {
+//         return res.status(403).json({
+//             message: "Your account is blocked by admin"
+//         });
+//     }
+
+   
+
+
+//     if (!user.isVerified) {
+//         return res.status(400).json({
+//             message: "Please verify email first"
+//         });
+//     }
+
+//     const accessToken = generateAccessToken(user);
+
+//     const refreshToken = generateRefreshToken(user);
+
+//     // Redis me store (7 days)
+//     await redisCilent.set(
+//         `refresh:${user._id}`,
+//         refreshToken,
+//         "EX",
+//         7 * 24 * 60 * 60
+//     );
+
+//     const isProd = process.env.NODE_ENV === "production";
+
+
+//     // cookie
+//     res.cookie("accessToken", accessToken, {
+//         httpOnly: true,
+//         secure: isProd,
+//         maxAge: 15 * 60 * 1000,
+//         sameSite: isProd ? "None": "Lax",
+//         path: "/",
+
+//     });
+
+//     res.cookie("refreshToken", refreshToken, {
+//         httpOnly: true,
+//         secure: isProd,
+//         sameSite: isProd ? "None": "Lax",
+//         maxAge: 7 * 24 * 60 * 60 * 1000,
+//         path: "/",
+//     });
+
+//     // console.log("acccessToken====>", accessToken)
+//     // console.log("refreshToken====>", refreshToken);
+    
+
+//     res.json({
+//         message: "Login success",
+//         user
+//     });
+
+// };
+
+
+
+
+export const loginUser = async (req, res) => {
+  try {
     const { email, password } = req.body;
 
     const key = `login_attempts:${email}`;
-
     let attempts = await redisCilent.get(key);
 
-    // 🔴 check lock
+    // 🔴 block check
     if (attempts && parseInt(attempts) >= 3) {
       const ttl = await redisCilent.ttl(key);
 
@@ -209,17 +313,19 @@ export const loginUser = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
+
+    // ❌ user not found
     if (!user) {
-            return res.status(400).json({ message: "User is not found" });
-        }
+      attempts = await redisCilent.incr(key);
+      if (attempts === 1) await redisCilent.expire(key, 120);
 
- if (!user) {
-    attempts = await redisCilent.incr(key);
-    if (attempts === 1) await redisCilent.expire(key, 900);
-    return res.status(400).json({ msg: "Invalid credentials" });
-  }
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
 
-   const match = await bcrypt.compare(password, user.password);
+    // ❌ password check
+    const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
       attempts = await redisCilent.incr(key);
@@ -234,67 +340,69 @@ export const loginUser = async (req, res) => {
     await redisCilent.del(key);
 
     if (user.isBlocked) {
-        return res.status(403).json({
-            message: "Your account is blocked by admin"
-        });
+      return res.status(403).json({
+        message: "Your account is blocked",
+      });
     }
 
-   
-
-    // const match = await bcrypt.compare(password, user.password);
-
-    // if (!match) {
-    //     return res.status(400).json({ message: "Invalid password" });
-    // }
-
     if (!user.isVerified) {
-        return res.status(400).json({
-            message: "Please verify email first"
-        });
+      return res.status(400).json({
+        message: "Please verify email first",
+      });
     }
 
     const accessToken = generateAccessToken(user);
-
     const refreshToken = generateRefreshToken(user);
 
-    // Redis me store (7 days)
     await redisCilent.set(
-        `refresh:${user._id}`,
-        refreshToken,
-        "EX",
-        7 * 24 * 60 * 60
+      `refresh:${user._id}`,
+      refreshToken,
+      "EX",
+      7 * 24 * 60 * 60
     );
+
+    // 🔥 COOKIE FIX
+    // res.cookie("accessToken", accessToken, {
+    //   httpOnly: true,
+    //   secure: false, // localhost me false
+    //   sameSite: "Lax",
+    //   maxAge: 15 * 60 * 1000,
+    // });
+
+    // res.cookie("refreshToken", refreshToken, {
+    //   httpOnly: true,
+    //   secure: false,
+    //   sameSite: "Lax",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
 
     const isProd = process.env.NODE_ENV === "production";
 
+res.cookie("accessToken", accessToken, {
+  httpOnly: true,
+  secure: true,              
+  sameSite: "None",          
+  maxAge: 15 * 60 * 1000,
+});
 
-    // cookie
-    res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: isProd,
-        maxAge: 15 * 60 * 1000,
-        sameSite: isProd ? "None": "Lax",
-        path: "/",
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
+    return res.json({
+      message: "Login success",
+      user,
     });
 
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? "None": "Lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        path: "/",
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Server error",
     });
-
-    // console.log("acccessToken====>", accessToken)
-    // console.log("refreshToken====>", refreshToken);
-    
-
-    res.json({
-        message: "Login success",
-        user
-    });
-
+  }
 };
 
 

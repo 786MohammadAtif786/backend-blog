@@ -376,34 +376,52 @@ export const loginUser = async (req, res) => {
     //   maxAge: 7 * 24 * 60 * 60 * 1000,
     // });
 
-    const isProd = process.env.NODE_ENV === "production";
+        //const isProd = process.env.NODE_ENV === "production";
+        const isProd = true;
+        // res.cookie("accessToken", accessToken, {
+        // httpOnly: true,
+        // secure: true,              
+        // sameSite: "None",          
+        // maxAge: 15 * 60 * 1000,
+        // });
 
-res.cookie("accessToken", accessToken, {
-  httpOnly: true,
-  secure: true,              
-  sameSite: "None",          
-  maxAge: 15 * 60 * 1000,
-});
+        // res.cookie("refreshToken", refreshToken, {
+        // httpOnly: true,
+        // secure: true,
+        // sameSite: "None",
+        // maxAge: 7 * 24 * 60 * 60 * 1000,
+        // });
 
-res.cookie("refreshToken", refreshToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "None",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
 
-    return res.json({
-      message: "Login success",
-      user,
-    });
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: isProd,
+            maxAge: 15 * 60 * 1000,
+            sameSite: isProd ? "None": "Lax",
+            path: "/",
 
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      message: "Server error",
-    });
-  }
-};
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "None": "Lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: "/",
+        });
+
+            return res.json({
+            message: "Login success",
+            user,
+            });
+
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json({
+            message: "Server error",
+            });
+        }
+        };
 
 
 // export const refreshToken = async (req, res) => {

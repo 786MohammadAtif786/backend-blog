@@ -43,36 +43,39 @@ redisCilent.connect().then(() => {
 app.set("trust proxy", 1);
 
 
-app.use(cors({
-  origin: "https://www.devnotes.sbs",
-  credentials: true
-}));
-
 // app.use(cors({
-//   origin: function (origin, callback) {
-
-//     const allowedOrigins = [
-//       "http://localhost:5173",
-//       "https://frontend-blog-alpha-ten.vercel.app",
-//       "https://devnotes.sbs",
-//       "https://www.devnotes.sbs"
-//     ];
-
-//     // 🔥 allow no origin (mobile, postman, incognito)
-//     if (!origin) return callback(null, true);
-
-//     // 🔥 normalize origin (remove trailing slash)
-//     const cleanOrigin = origin.replace(/\/$/, "");
-
-//     if (allowedOrigins.includes(cleanOrigin)) {
-//       callback(null, true);
-//     } else {
-//       console.log("Blocked origin:", origin); // 🔍 debug
-//       callback(null, false); // ❗ don't throw error
-//     }
-//   },
+//   origin: [
+//     "https://www.devnotes.sbs",
+//     "http://localhost:5173"
+//   ],
 //   credentials: true
 // }));
+
+app.use(cors({
+  origin: function (origin, callback) {
+
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "https://frontend-blog-alpha-ten.vercel.app",
+      "https://devnotes.sbs",
+      "https://www.devnotes.sbs"
+    ];
+
+    // 🔥 allow no origin (mobile, postman, incognito)
+    if (!origin) return callback(null, true);
+
+    // 🔥 normalize origin (remove trailing slash)
+    const cleanOrigin = origin.replace(/\/$/, "");
+
+    if (allowedOrigins.includes(cleanOrigin)) {
+      callback(null, true);
+    } else {
+      console.log("Blocked origin:", origin); // 🔍 debug
+      callback(null, false); // ❗ don't throw error
+    }
+  },
+  credentials: true
+}));
 
 // middleware
 app.use(cookieParser());

@@ -10,9 +10,11 @@ import {
  getAllUsers,
  toggleBlockUser,
  forgotPassword,
- resetPassword
+ resetPassword,
+ updateProfile
 } from "../controllers/userControllers.js"
 import { protect } from "../middleware/authMiddleware.js"
+import { upload } from "../middleware/uploadUsers.js"
 
 const router = express.Router()
 
@@ -29,6 +31,11 @@ router.get("/admin/users", protect, getAllUsers);
 router.patch("/admin/block/:id", protect, toggleBlockUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
-
+router.put(
+  "/update-profile",
+  protect,
+  upload.single("image"),
+  updateProfile
+);
 
 export default router

@@ -29,9 +29,13 @@ const userSchema = new mongoose.Schema({
     default:false
   },
   isBlocked: {
-  type: Boolean,
-  default: false
-},
+    type: Boolean,
+    default: false
+  },
+  profilePic: {
+    type: String,
+    default: "",
+  },
  resetPasswordToken: String,
   resetPasswordExpires: Date
 

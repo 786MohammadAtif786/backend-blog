@@ -733,3 +733,46 @@ export const resetPassword = async (req, res) => {
         });
     }
 };
+
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const { name, password } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ✅ Name update (optional)
+    if (name) {
+      user.name = name;
+    }
+
+    // 🔒 Password update (optional)
+    if (password) {
+      const hashed = await bcrypt.hash(password, 10);
+      user.password = hashed;
+    }
+
+    // 🖼️ Profile Image (optional)
+    if (req.file) {
+      // CloudinaryStorage already gives secure URL
+      user.profilePic = req.file.path;
+    }
+
+    await user.save();
+
+    res.json({
+      message: "Profile updated successfully",
+      user,
+    });
+
+  } catch (err) {
+    console.log("UPDATE PROFILE ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

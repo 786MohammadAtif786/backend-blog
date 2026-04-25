@@ -419,9 +419,25 @@ export const getSingleBlogAdmin = async (req, res) => {
 };
 
 
+// export const getMyBlogs = async (req, res) => {
+//     const blogs = await Blog.find({ author: req.user.id });
+//     res.json(blogs);
+// };
+
 export const getMyBlogs = async (req, res) => {
-    const blogs = await Blog.find({ author: req.user.id });
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const blogs = await Blog.find({ author: req.user._id });
+
     res.json(blogs);
+
+  } catch (err) {
+    console.log("MY BLOG ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 

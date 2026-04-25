@@ -430,7 +430,7 @@ export const getMyBlogs = async (req, res) => {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    const blogs = await Blog.find({ author: req.user._id });
+    const blogs = await Blog.find({ author: req.user.id });
 
     res.json(blogs);
 

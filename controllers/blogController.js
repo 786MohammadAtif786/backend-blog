@@ -2,36 +2,6 @@ import Blog from "../models/Blog.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-// export const createBlog = async (req, res) => {
-
-//     try {
-
-//         const { title, content, categories } = req.body;
-
-//         const blog = await Blog.create({
-//             title,
-//             content,
-//             categories,
-//             image: req.file?.path,
-//             author: req.user.id
-//         });
-
-//         res.json({
-//             message: "Blog created. Waiting for admin approval",
-//             blog
-//         });
-
-//     } catch (err) {
-//         console.log(err);
-
-//         res.status(500).json({
-//             message: "Error creating blog"
-//         });
-
-//     }
-
-// }
-
 
 import { getChannel } from "../config/rabbit.js";
 

@@ -2,7 +2,7 @@ import amqp from "amqplib";
 import sharp from "sharp";
 import nodemailer from "nodemailer";
 import mongoose from "mongoose";
-import Blog from "./models/blog.js"; // path adjust karo
+import Blog from "../models/Blog.js"; // path adjust karo
 
 // ✅ Mongo connect (important for worker)
 await mongoose.connect(process.env.MONGO_URI);

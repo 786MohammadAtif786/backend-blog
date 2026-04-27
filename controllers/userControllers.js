@@ -354,11 +354,18 @@ export const loginUser = async (req, res) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    await redisCilent.set(
-      `refresh:${user._id}`,
-      refreshToken,
-      "EX",
-      7 * 24 * 60 * 60
+    // await redisCilent.set(
+    //   `refresh:${user._id}`,
+    //   refreshToken,
+    //   "EX",
+    //   7 * 24 * 60 * 60
+    // );
+    await redisClient.set(
+        `refresh:${user._id}`,
+        refreshToken,
+        {
+            EX: 7 * 24 * 60 * 60
+        }
     );
 
     // 🔥 COOKIE FIX

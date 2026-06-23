@@ -63,7 +63,7 @@ export const sendEmail = async (email, token) => {
     <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 30px; border-radius: 10px; text-align: center;">
 
       <!-- Logo / Title -->
-      <h1 style="color: #6b21a8; margin-bottom: 10px;">
+      <h1 style="color: #157A9E; margin-bottom: 10px;">
         DevNotes 🚀
       </h1>
 
@@ -83,7 +83,7 @@ export const sendEmail = async (email, token) => {
            display: inline-block;
            margin-top: 20px;
            padding: 12px 20px;
-           background-color: #6b21a8;
+           background-color: #157A9E;
            color: #ffffff;
            text-decoration: none;
            border-radius: 6px;
@@ -97,7 +97,7 @@ export const sendEmail = async (email, token) => {
         If the button doesn't work, copy & paste this link:
       </p>
 
-      <p style="word-break: break-all; font-size: 13px; color: #6b21a8;">
+      <p style="word-break: break-all; font-size: 13px; color: #136b89;">
         ${verifyUrl}
       </p>
 

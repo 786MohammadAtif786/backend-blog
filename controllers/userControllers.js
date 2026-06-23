@@ -18,20 +18,20 @@ dotenv.config()
 export const registerUser = async (req, res) => {
 
     try {
-        
+
         const data = registerSchema.parse(req.body)
 
-        
+
 
         const { name, email, password } = data
+        const hashedPassword = await bcrypt.hash(password, 10)
 
         const existingUser = await User.findOne({ email })
 
         if (existingUser) {
             return res.status(400).json({ message: "Email already exists" })
         }
-        
-        const hashedPassword = await bcrypt.hash(password, 10)
+
 
         const user = await User.create({
             name,
@@ -46,7 +46,7 @@ export const registerUser = async (req, res) => {
         )
 
         sendEmail(email, token)
-          await redisCilent.setEx(`verify_cooldown:${email}`, 600, "1");
+        await redisCilent.setEx(`verify_cooldown:${email}`, 600, "1");
         res.json({
             message: "Verification email sent"
         })
@@ -239,7 +239,7 @@ export const verifyEmail = async (req, res) => {
 //         });
 //     }
 
-   
+
 
 
 //     if (!user.isVerified) {
@@ -283,7 +283,7 @@ export const verifyEmail = async (req, res) => {
 
 //     // console.log("acccessToken====>", accessToken)
 //     // console.log("refreshToken====>", refreshToken);
-    
+
 
 //     res.json({
 //         message: "Login success",
@@ -296,109 +296,85 @@ export const verifyEmail = async (req, res) => {
 
 
 export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    const key = `login_attempts:${email}`;
-    let attempts = await redisCilent.get(key);
+        const key = `login_attempts:${email}`;
+        let attempts = await redisCilent.get(key);
 
-    // 🔴 block check
-    if (attempts && parseInt(attempts) >= 3) {
-      const ttl = await redisCilent.ttl(key);
+        // 🔴 block check
+        if (attempts && parseInt(attempts) >= 3) {
+            const ttl = await redisCilent.ttl(key);
 
-      return res.status(429).json({
-        message: "Too many attempts",
-        ttl,
-      });
-    }
+            return res.status(429).json({
+                message: "Too many attempts",
+                ttl,
+            });
+        }
 
-    const user = await User.findOne({ email });
+        const user = await User.findOne({ email });
 
-    // ❌ user not found
-    if (!user) {
-      attempts = await redisCilent.incr(key);
-      if (attempts === 1) await redisCilent.expire(key, 120);
+        // ❌ user not found
+        if (!user) {
+            attempts = await redisCilent.incr(key);
+            if (attempts === 1) await redisCilent.expire(key, 120);
 
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
-    }
+            return res.status(400).json({
+                message: "Invalid credentials",
+            });
+        }
 
-    // ❌ password check
-    const match = await bcrypt.compare(password, user.password);
+        // ❌ password check
+        const match = await bcrypt.compare(password, user.password);
 
-    if (!match) {
-      attempts = await redisCilent.incr(key);
-      if (attempts === 1) await redisCilent.expire(key, 120);
+        if (!match) {
+            attempts = await redisCilent.incr(key);
+            if (attempts === 1) await redisCilent.expire(key, 120);
 
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
-    }
+            return res.status(400).json({
+                message: "Invalid credentials",
+            });
+        }
 
-    // ✅ success → reset attempts
-    await redisCilent.del(key);
+        // ✅ success → reset attempts
+        await redisCilent.del(key);
 
-    if (user.isBlocked) {
-      return res.status(403).json({
-        message: "Your account is blocked",
-      });
-    }
+        if (user.isDeleted) {
+            return res.status(403).json({
+                message: "Email are not found"
+            });
+        }
 
-    if (!user.isVerified) {
-      return res.status(400).json({
-        message: "Please verify email first",
-      });
-    }
+        if (user.isBlocked) {
+            return res.status(403).json({
+                message: "Your account is blocked",
+            });
+        }
 
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+        if (!user.isVerified) {
+            return res.status(400).json({
+                message: "Please verify email first",
+            });
+        }
 
-    await redisCilent.set(
-      `refresh:${user._id}`,
-      refreshToken,
-      "EX",
-      7 * 24 * 60 * 60
-    );
- 
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
 
-    // 🔥 COOKIE FIX
-    // res.cookie("accessToken", accessToken, {
-    //   httpOnly: true,
-    //   secure: false, // localhost me false
-    //   sameSite: "Lax",
-    //   maxAge: 15 * 60 * 1000,
-    // });
+        await redisCilent.set(
+            `refresh:${user._id}`,
+            refreshToken,
+            "EX",
+            7 * 24 * 60 * 60
+        );
 
-    // res.cookie("refreshToken", refreshToken, {
-    //   httpOnly: true,
-    //   secure: false,
-    //   sameSite: "Lax",
-    //   maxAge: 7 * 24 * 60 * 60 * 1000,
-    // });
 
-        //const isProd = process.env.NODE_ENV === "production";
         const isProd = true;
-        // res.cookie("accessToken", accessToken, {
-        // httpOnly: true,
-        // secure: true,              
-        // sameSite: "None",          
-        // maxAge: 15 * 60 * 1000,
-        // });
-
-        // res.cookie("refreshToken", refreshToken, {
-        // httpOnly: true,
-        // secure: true,
-        // sameSite: "None",
-        // maxAge: 7 * 24 * 60 * 60 * 1000,
-        // });
-
 
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
             secure: isProd,
             maxAge: 15 * 60 * 1000,
-            sameSite: isProd ? "None": "Lax",
+            sameSite: isProd ? "None" : "Lax",
             path: "/",
 
         });
@@ -406,23 +382,23 @@ export const loginUser = async (req, res) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: isProd,
-            sameSite: isProd ? "None": "Lax",
+            sameSite: isProd ? "None" : "Lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
             path: "/",
         });
 
-            return res.json({
+        return res.json({
             message: "Login success",
             user,
-            });
+        });
 
-        } catch (err) {
-            console.log(err);
-            return res.status(500).json({
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
             message: "Server error",
-            });
-        }
-        };
+        });
+    }
+};
 
 
 // export const refreshToken = async (req, res) => {
@@ -597,60 +573,6 @@ export const toggleBlockUser = async (req, res) => {
 
 
 
-// import User from "../models/User.js";
-
-// export const forgotPassword = async (req, res) => {
-//     try {
-//         const { email } = req.body;
-
-//         const user = await User.findOne({ email });
-
-//         if (!user) {
-//             return res.status(404).json({
-//                 message: "User not found"
-//             });
-//         }
-
-//         // 🔐 Generate token
-//         const token = crypto.randomBytes(32).toString("hex");
-
-//         // Save token + expiry
-//         user.resetPasswordToken = token;
-//         user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 min
-
-//         await user.save();
-
-//         // 🔗 Reset link
-//         const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
-
-//         // 📧 Send Email (SendGrid)
-//         const msg = {
-//             to: user.email,
-//             from: process.env.SENDGRID_EMAIL, // verified sender
-//             subject: "Password Reset Request",
-//             html: `
-//                 <h2>Password Reset</h2>
-//                 <p>You requested to reset your password.</p>
-//                 <a href="${resetLink}" style="color:blue;">Click here to reset</a>
-//                 <p>This link expires in 15 minutes.</p>
-//             `
-//         };
-
-//         await sgMail.send(msg);
-
-//         res.json({
-//             message: "Reset link sent to your email"
-//         });
-
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({
-//             message: "Server error"
-//         });
-//     }
-// };
-
-
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -674,7 +596,7 @@ export const forgotPassword = async (req, res) => {
             to: user.email,
             from: {
                 email: process.env.EMAIL_FROM,
-                name: "Auth App"
+                name: "DevNotes"
             },
             subject: "Password Reset",
             html: `
@@ -690,7 +612,7 @@ export const forgotPassword = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        
+
         console.log("❌ SendGrid Error:", error.response?.body);
         res.status(500).json({ message: "Error sending email" });
     }
@@ -737,43 +659,70 @@ export const resetPassword = async (req, res) => {
 
 
 export const updateProfile = async (req, res) => {
-  try {
-    const userId = req.user.id;
+    try {
+        const userId = req.user.id;
 
-    const { name, password } = req.body;
+        const { name, password } = req.body;
 
-    const user = await User.findById(userId);
+        const user = await User.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // ✅ Name update (optional)
+        if (name) {
+            user.name = name;
+        }
+
+        // 🔒 Password update (optional)
+        if (password) {
+            const hashed = await bcrypt.hash(password, 10);
+            user.password = hashed;
+        }
+
+        // 🖼️ Profile Image (optional)
+        if (req.file) {
+            // CloudinaryStorage already gives secure URL
+            user.profilePic = req.file.path;
+        }
+
+        await user.save();
+
+        res.json({
+            message: "Profile updated successfully",
+            user,
+        });
+
+    } catch (err) {
+        console.log("UPDATE PROFILE ERROR:", err);
+        res.status(500).json({ message: "Server error" });
     }
+};
 
-    // ✅ Name update (optional)
-    if (name) {
-      user.name = name;
+
+export const deleteAccount = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // 1. Soft delete user
+        await User.findByIdAndUpdate(userId, {
+            isDeleted: true,
+            isVerified: false
+        });
+
+        // 2. Refresh token delete (Redis example)
+        await redisClient.del(`refresh:${userId}`);
+
+        // 3. Cookies clear
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+
+        res.status(200).json({
+            message: "Account deleted successfully"
+        });
+
+    } catch (err) {
+        res.status(500).json({ message: "Error deleting account" });
     }
-
-    // 🔒 Password update (optional)
-    if (password) {
-      const hashed = await bcrypt.hash(password, 10);
-      user.password = hashed;
-    }
-
-    // 🖼️ Profile Image (optional)
-    if (req.file) {
-      // CloudinaryStorage already gives secure URL
-      user.profilePic = req.file.path;
-    }
-
-    await user.save();
-
-    res.json({
-      message: "Profile updated successfully",
-      user,
-    });
-
-  } catch (err) {
-    console.log("UPDATE PROFILE ERROR:", err);
-    res.status(500).json({ message: "Server error" });
-  }
 };

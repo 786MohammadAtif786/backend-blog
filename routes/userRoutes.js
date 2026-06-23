@@ -11,7 +11,8 @@ import {
  toggleBlockUser,
  forgotPassword,
  resetPassword,
- updateProfile
+ updateProfile,
+ deleteAccount
 } from "../controllers/userControllers.js"
 import { protect } from "../middleware/authMiddleware.js"
 import { upload } from "../middleware/uploadUsers.js"
@@ -37,5 +38,6 @@ router.put(
   upload.single("image"),
   updateProfile
 );
+//  router.delete('/delete', protect, deleteAccount)
 
 export default router

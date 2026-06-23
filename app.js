@@ -203,6 +203,8 @@ app.use(cors({
 
     const allowedOrigins = [
       "http://localhost:5173",
+        "http://localhost:8081", 
+      "http://localhost:19006",
       "https://frontend-blog-alpha-ten.vercel.app",
       "https://devnotes.sbs",
       "https://www.devnotes.sbs"

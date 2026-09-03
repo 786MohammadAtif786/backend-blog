@@ -15,6 +15,61 @@ import sgMail from "../utils/sendGrid.js";
 
 dotenv.config()
 
+// export const registerUser = async (req, res) => {
+
+//     try {
+
+//         const data = registerSchema.parse(req.body)
+
+
+
+//         const { name, email, password } = data
+//         const hashedPassword = await bcrypt.hash(password, 10)
+
+//         const existingUser = await User.findOne({ email })
+
+//         if (existingUser) {
+//             return res.status(400).json({ message: "Email already exists" })
+//         }
+
+
+//         const user = await User.create({
+//             name,
+//             email,
+//             password: hashedPassword
+//         })
+
+//         const token = jwt.sign(
+//             { id: user._id },
+//             process.env.JWT_SECRET,
+//             { expiresIn: "1d" }
+//         )
+
+//         sendEmail(email, token)
+//         await redisCilent.setEx(`verify_cooldown:${email}`, 600, "1");
+//         res.json({
+//             message: "Verification email sent"
+//         })
+
+//     } catch (err) {
+
+//         // res.status(400).json(err)
+//         if (err.errors) {
+//             return res.status(400).json({
+//                 errors: err.errors.map(e => e.message)
+//             });
+//         }
+//         console.log(err)
+//         return res.status(400).json({
+//             message: err || "Something went wrong"
+//         });
+
+//     }
+
+// }
+
+
+
 export const registerUser = async (req, res) => {
 
     try {
@@ -38,6 +93,8 @@ export const registerUser = async (req, res) => {
             email,
             password: hashedPassword
         })
+                user.isVerified = true
+
 
         const token = jwt.sign(
             { id: user._id },
